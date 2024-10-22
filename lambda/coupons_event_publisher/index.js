@@ -1,5 +1,10 @@
 const AWS = require("aws-sdk");
-const kinesis = new AWS.Kinesis();
+const kinesis = new AWS.Kinesis({
+  endpoint: "http://host.docker.internal:4566",
+  region: "us-east-1",
+  accessKeyId: "test",
+  secretAccessKey: "test",
+});
 
 exports.handler = async (event) => {
   try {

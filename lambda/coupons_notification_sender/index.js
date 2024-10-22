@@ -1,5 +1,10 @@
 const AWS = require("aws-sdk");
-const sns = new AWS.SNS();
+const sns = new AWS.SNS({
+  endpoint: "http://host.docker.internal:4566",
+  region: "us-east-1",
+  accessKeyId: "test",
+  secretAccessKey: "test",
+});
 
 exports.handler = async (event) => {
   try {
@@ -22,7 +27,7 @@ exports.handler = async (event) => {
     const params = {
       Message: message,
       Subject: `New Coupon: ${event.title}`,
-      TopicArn: `arn:aws:sns:us-east-1:000000000000:coupons`, // Change the region/account ID as needed
+      TopicArn: `arn:aws:sns:us-east-1:000000000000:coupons`,
     };
 
     // Publish to SNS topic
