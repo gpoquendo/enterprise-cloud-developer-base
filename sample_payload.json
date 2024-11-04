@@ -1,0 +1,8 @@
+{
+    "httpMethod": "POST",
+    "headers": {
+        "Authorization": "Bearer pXVCJ9.eyJ1c2VybmFtZSI6InRlc3RlcjEiLCJpYXQiOjE3MjkwNDk5MjMsImV4cCI6MTcyOTA1MzUyM30.EqSr2xAQf6AoqqNDz93bH_UZPi7s75ijWkxKCC23nlw",
+        "Content-Type": "application/json"
+    },
+    "body": "{\"username\": \"tester1\", \"password\": \"Pc4RM0AMKy5aSGfD\"}"
+}
