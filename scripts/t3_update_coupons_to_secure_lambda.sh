@@ -1,20 +1,63 @@
 #!/bin/bash
 
-# Navigate to the coupons_get_token lambda directory
-cd lambda/coupons_to_secure
+# Navigate to the project root
+cd "$(dirname "$0")/.."
 
-# Remove any existing zip file
-rm -f ../../coupons_to_secure.zip
+# Create a temporary directory for packaging
+mkdir -p temp_package
 
-# Create a new zip file including the index.js and node_modules
-zip -r ../../coupons_to_secure.zip index.js node_modules
+# Copy the Lambda function code
+cp lambda/coupons_to_secure/index.js temp_package/
 
-# Navigate back to the root directory
-cd ../../
+# Create a package.json file
+cat << EOF > temp_package/package.json
+{
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1"
+  }
+}
+EOF
 
-# Update the Lambda function with the new code
-awslocal lambda update-function-code \
-  --function-name coupons_to_secure \
-  --zip-file fileb://coupons_to_secure.zip
+# Install dependencies
+cd temp_package
+if ! npm install --production; then
+    echo "Failed to install dependencies."
+    exit 1
+fi
+cd ..
 
-echo "Lambda function updated successfully."
+# Create the deployment package
+zip -r coupons_to_secure.zip temp_package/*
+
+# Check if the ZIP file was created
+if [ ! -f coupons_to_secure.zip ]; then
+    echo "Failed to create the ZIP file."
+    exit 1
+fi
+
+# Update Lambda function code
+if ! awslocal lambda update-function-code \
+    --function-name coupons_to_secure \
+    --zip-file fileb://coupons_to_secure.zip; then
+    echo "Failed to update Lambda function code."
+    exit 1
+fi
+
+# Wait for the update to complete
+sleep 30
+
+# Update Lambda function configuration
+if ! awslocal lambda update-function-configuration \
+    --function-name coupons_to_secure \
+    --handler index.handler \
+    --runtime nodejs14.x \
+    --timeout 10 \
+    --memory-size 128; then
+    echo "Failed to update Lambda function configuration."
+    exit 1
+fi
+
+# Clean up
+rm -rf temp_package coupons_to_secure.zip
+
+echo "coupons_to_secure Lambda function updated successfully"
